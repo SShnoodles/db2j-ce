@@ -1,0 +1,19 @@
+#foreach ($element in $vm.imports)
+import $!element;
+#end
+
+/**
+ * $!vm.table.remarks
+ * @author $!vm.author
+ * Create at $!vm.dateTime
+ */
+@Data
+public class $!vm.table.className {
+#foreach ($column in $vm.table.columns)
+
+    /**
+     * $!column.remarks
+     */
+    private $!column.fieldType $!column.fieldName;
+#end
+}

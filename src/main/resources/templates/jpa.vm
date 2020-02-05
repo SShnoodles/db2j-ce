@@ -1,0 +1,34 @@
+#foreach($element in $!vm.imports)
+import $!element;
+#end
+
+/**
+ * $!vm.table.remarks
+ * @author $!vm.author
+ * Create at $!vm.dateTime
+ */
+@Entity
+@Table(name = "$!vm.table.name")
+@Data
+public class $!vm.table.className {
+
+    public $!{vm.table.className}(#foreach($key in $!vm.table.primaryKeys)$key.fieldType $key.fieldName#if($foreach.index < $foreach.count - 1),#end#end) {
+    #foreach($key in $!vm.table.primaryKeys)
+        this.$!key.fieldName = $!key.fieldName;
+    #end
+    }
+#foreach($column in $!vm.table.columns)
+    /**
+     * $!column.remarks
+     */
+#if($!column.primaryKey)
+    @Id
+#end
+#if($!column.nullable)
+    @Column(name = "$!column.name")
+#else
+    @Column(name = "$!column.name", nullable = false)
+#end
+    private $!column.fieldType $!column.fieldName;
+#end
+}

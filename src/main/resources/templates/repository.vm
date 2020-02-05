@@ -1,0 +1,10 @@
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+
+/**
+ * $!vm.table.remarks
+ * @author $!vm.author
+ * Create at $!vm.dateTime
+ */
+public interface $!vm.table.className extends JpaRepository<$!vm.table.className, #if($vm.table.primaryKeys.size() == 1)$!vm.table.primaryKeys.get(0).getFieldType()#end>, QuerydslPredicateExecutor<$!vm.table.className> {
+}
