@@ -4,6 +4,7 @@ import cc.ssnoodles.db.constant.*;
 import cc.ssnoodles.db.domain.*;
 import cc.ssnoodles.db.util.*;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +61,11 @@ public interface Template {
     default void init(Config config) throws SQLException {
         TABLES.clear();
         TABLES.addAll(getTables(config));
+    }
+
+    default void refresh(List<Table> tables) {
+        TABLES.clear();
+        TABLES.addAll(tables);
     }
 
     default String render(Config config, Table table, String template) {
@@ -124,8 +130,9 @@ public interface Template {
                 }
             }
             table.setPrimaryKeys(primaryKeys);
+            table.setDateTime(LocalDateTime.now());
             tableList.add(table);
-            System.out.println(tableList.size() + ". " + tableName);
+            System.out.println("Db2j-ce: " + tableList.size() + ". " + tableName);
         }
         conn.close();
         return tableList;

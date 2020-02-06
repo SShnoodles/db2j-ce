@@ -2,6 +2,7 @@ package cc.ssnoodles.db.domain;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,4 +20,5 @@ public class Table {
 
     private String className;
     private boolean primaryKey;
+    private LocalDateTime dateTime;
 }

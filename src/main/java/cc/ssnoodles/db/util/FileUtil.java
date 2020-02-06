@@ -37,7 +37,7 @@ public class FileUtil {
         try {
             String url = properties.getProperty("url");
             Config config = new Config();
-            config.setDbType(getDb(url));
+            config.setDbType(DbType.getFromUrl(url));
             config.setUrl(url);
             config.setUsername(properties.getProperty("username"));
             config.setPassword(properties.getProperty("password"));
@@ -64,21 +64,6 @@ public class FileUtil {
             templateTypes[i] = TemplateType.get(split[i]);
         }
         return templateTypes;
-    }
-
-    private static DbType getDb(String url) {
-        if (StringUtil.isEmpty(url)) {
-            throw new RuntimeException("Load configuration file url property failed");
-        }
-        if (url.contains(DbType.ORACLE.getType())) {
-            return DbType.ORACLE;
-        } else if (url.contains(DbType.POSTGRESQL.getType())) {
-            return DbType.POSTGRESQL;
-        } else if (url.contains(DbType.MYSQL.getType())) {
-            return DbType.MYSQL;
-        } else {
-            throw new RuntimeException("No database was found to be supported");
-        }
     }
 
     public static void write2JavaFiles(String path, String str, boolean isOverwriteFiles) {
