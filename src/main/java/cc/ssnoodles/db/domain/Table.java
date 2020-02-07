@@ -20,5 +20,5 @@ public class Table {
 
     private String className;
     private boolean primaryKey;
-    private LocalDateTime dateTime;
+    private long timestamp;
 }

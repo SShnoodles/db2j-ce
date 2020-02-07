@@ -1,6 +1,6 @@
 package cc.ssnoodles.db.util;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -22,4 +22,15 @@ public class TimeUtil {
         return DATE_TIME_SS.format(LocalDateTime.now());
     }
 
+    public static LocalDateTime timestampToLocalDateTime(long timestamp) {
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        ZoneId zone = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(instant, zone);
+    }
+
+    public static long localDateTimeToTimestamp(LocalDateTime localDateTime) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        Instant instant = localDateTime.atZone(zoneId).toInstant();
+        return instant.toEpochMilli();
+    }
 }

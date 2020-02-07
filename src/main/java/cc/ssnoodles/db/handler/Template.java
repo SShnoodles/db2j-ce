@@ -5,8 +5,7 @@ import cc.ssnoodles.db.domain.*;
 import cc.ssnoodles.db.util.*;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ssnoodles
@@ -25,7 +24,7 @@ public interface Template {
 
     String className(String name, String rename);
 
-    default ClassContext getContent(Config config, Table table) {
+    default ClassContext getContent(Config config, Table table, String...importString) {
         ClassContext classContext = new ClassContext();
         classContext.setAuthor(StringUtil.isEmpty(config.getAuthor()) ? SYSTEM_NAME : config.getAuthor());
         classContext.setDateTime(TimeUtil.getTime());
@@ -45,6 +44,9 @@ public interface Template {
             if ("BigDecimal".equals(column.getFieldType())) {
                 imports.add("java.math.BigDecimal");
             }
+            if ("OffsetDateTime".equals(column.getFieldType())) {
+                imports.add("java.time.OffsetDateTime");
+            }
             table.getPrimaryKeys().forEach(key -> {
                 if (key.getName().equals(column.getName())) {
                     key.setFieldType(column.getFieldType());
@@ -53,6 +55,7 @@ public interface Template {
             });
 
         });
+        imports.addAll(Arrays.asList(importString));
         classContext.setImports(imports);
         classContext.setTable(table);
         return classContext;
@@ -79,6 +82,7 @@ public interface Template {
                 DbCharsetTypeUtil.convertDatabaseCharsetType(config.getUsername(), config.getDbType().getType()),
                 StringUtil.isEmpty(config.getSingleTableName()) ? null : config.getSingleTableName(), new String[]{"TABLE"});
         List<Table> tableList = new ArrayList<>();
+        long timestamp = System.currentTimeMillis();
         while (rs.next()) {
             String tableName = rs.getString("TABLE_NAME");
             String tableRemarks = rs.getString("REMARKS");
@@ -130,7 +134,7 @@ public interface Template {
                 }
             }
             table.setPrimaryKeys(primaryKeys);
-            table.setDateTime(LocalDateTime.now());
+            table.setTimestamp(timestamp);
             tableList.add(table);
             System.out.println("Db2j-ce: " + tableList.size() + ". " + tableName);
         }

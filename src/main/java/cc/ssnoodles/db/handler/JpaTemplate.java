@@ -16,7 +16,7 @@ import java.sql.SQLException;
 public class JpaTemplate implements Template {
     @Override
     public String render(Config config, Table table) {
-        return VelocityUtil.generate(TemplateType.JPA, getContent(config, table));
+        return VelocityUtil.generate(TemplateType.JPA, getContent(config, table, "javax.persistence.*"));
     }
 
     @Override

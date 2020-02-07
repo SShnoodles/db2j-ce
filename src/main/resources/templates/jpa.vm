@@ -10,14 +10,16 @@ import $!element;
 @Entity
 @Table(name = "$!vm.table.name")
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class $!vm.table.className {
 
     public $!{vm.table.className}(#foreach($key in $!vm.table.primaryKeys)$key.fieldType $key.fieldName#if($foreach.index < $foreach.count - 1),#end#end) {
-    #foreach($key in $!vm.table.primaryKeys)
+#foreach($key in $!vm.table.primaryKeys)
         this.$!key.fieldName = $!key.fieldName;
-    #end
+#end
     }
 #foreach($column in $!vm.table.columns)
+
     /**
      * $!column.remarks
      */
