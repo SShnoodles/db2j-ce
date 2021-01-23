@@ -22,11 +22,14 @@ public class JpaTemplate implements Template {
     @Override
     public void write(Config config) throws SQLException {
         init(config);
-        TABLES.forEach(table ->
-                FileUtil.write2JavaFiles(
-                        config.getOutPath() + File.separator + className(table.getName(), config.getSingleTableRename()),
-                        render(config, table),
-                        config.isOverwriteFiles())
+        SCHEMAS.forEach(schema ->
+                schema.getTables().forEach(table ->
+                    FileUtil.write2JavaFiles(
+                            config.getOutPath() + File.separator + className(table.getName(), config.getSingleTableRename()),
+                            render(config, table),
+                            config.isOverwriteFiles()
+                    )
+                )
         );
     }
 

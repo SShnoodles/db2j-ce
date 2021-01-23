@@ -11,13 +11,9 @@ import $!element;
 @Table(name = "$!vm.table.name")
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
 public class $!vm.table.className {
 
-    public $!{vm.table.className}(#foreach($key in $!vm.table.primaryKeys)$key.fieldType $key.fieldName#if($foreach.index < $foreach.count - 1),#end#end) {
-#foreach($key in $!vm.table.primaryKeys)
-        this.$!key.fieldName = $!key.fieldName;
-#end
-    }
 #foreach($column in $!vm.table.columns)
 
     /**
@@ -25,6 +21,7 @@ public class $!vm.table.className {
      */
 #if($!column.primaryKey)
     @Id
+    @NonNull
 #end
 #if($!column.nullable)
     @Column(name = "$!column.name")

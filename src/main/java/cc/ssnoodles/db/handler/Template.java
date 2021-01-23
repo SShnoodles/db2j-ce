@@ -16,7 +16,7 @@ public interface Template {
 
     String SYSTEM_NAME = System.getProperty("user.name");
 
-    List<Table> TABLES = new ArrayList<>();
+    List<Schema> SCHEMAS = new ArrayList<>();
 
     String render(Config config, Table table) throws SQLException;
 
@@ -62,83 +62,102 @@ public interface Template {
     }
 
     default void init(Config config) throws SQLException {
-        TABLES.clear();
-        TABLES.addAll(getTables(config));
+        SCHEMAS.clear();
+        SCHEMAS.addAll(getTables(config));
     }
 
-    default void refresh(List<Table> tables) {
-        TABLES.clear();
-        TABLES.addAll(tables);
+    default void refresh(List<Schema> schemas) {
+        SCHEMAS.clear();
+        SCHEMAS.addAll(schemas);
     }
 
     default String render(Config config, Table table, String template) {
         return VelocityUtil.generate(template, getContent(config, table));
     }
 
-    default List<Table> getTables(Config config) throws SQLException {
+    default List<Schema> getTables(Config config) throws SQLException {
         Connection conn = ConnUtil.getConn(config);
         DatabaseMetaData dbMetData = conn.getMetaData();
-        ResultSet rs = dbMetData.getTables(null,
-                DbCharsetTypeUtil.convertDatabaseCharsetType(config.getUsername(), config.getDbType().getType()),
-                StringUtil.isEmpty(config.getSingleTableName()) ? null : config.getSingleTableName(), new String[]{"TABLE"});
-        List<Table> tableList = new ArrayList<>();
-        long timestamp = System.currentTimeMillis();
-        while (rs.next()) {
-            String tableName = rs.getString("TABLE_NAME");
-            String tableRemarks = rs.getString("REMARKS");
-            Table table = new Table();
-            List<Column> columns = new ArrayList<>();
-            ResultSet colRet;
-            // https://stackoverflow.com/questions/38557956/databasemetadatagetcolumns-returns-an-empty-resultset
-            if (DbType.ORACLE.getType().equals(config.getDbType().getType())) {
-                colRet = dbMetData.getColumns(null, config.getUsername().toUpperCase(), tableName, "%");
-            } else {
-                colRet = dbMetData.getColumns(config.getUsername(), null, tableName, "%");
-            }
+        ResultSet schemas = dbMetData.getSchemas();
 
-            while (colRet.next()) {
-                String columnName = colRet.getString("COLUMN_NAME");
-                String columnType = colRet.getString("TYPE_NAME");
-                String columnRemarks = colRet.getString("REMARKS");
-                int columnSize = colRet.getInt("COLUMN_SIZE");
-                int nullable = colRet.getInt("NULLABLE");
-                int decimalDigits = colRet.getInt("DECIMAL_DIGITS");
-                Column column = new Column();
-                column.setName(columnName);
-                column.setType(columnType);
-                column.setRemarks(columnRemarks);
-                column.setDecimalDigits(decimalDigits);
-                column.setSize(columnSize);
-                column.setNullable(nullable == 1);
-                columns.add(column);
-            }
+        List<Schema> schemaList = new ArrayList<>();
+        while (schemas.next()) {
+            Schema schema = new Schema();
+            String schemaName = schemas.getString("TABLE_SCHEM");
+            if (config.getDbType().isDefaultSchema(schemaName)) continue;
+            ResultSet rs = dbMetData.getTables(
+                    null,
+                    schemaName,
+                    StringUtil.isEmpty(config.getSingleTableName()) ? null : config.getSingleTableName(),
+                    new String[]{"TABLE"});
+            long timestamp = System.currentTimeMillis();
+            List<Table> tableList = new ArrayList<>();
+            while (rs.next()) {
+                String tableName = rs.getString("TABLE_NAME");
+                String tableRemarks = rs.getString("REMARKS");
+                Table table = new Table();
+                List<Column> columns = new ArrayList<>();
+                ResultSet colRet;
+                // https://stackoverflow.com/questions/38557956/databasemetadatagetcolumns-returns-an-empty-resultset
+                if (DbType.ORACLE.getType().equals(config.getDbType().getType())) {
+                    colRet = dbMetData.getColumns(null, config.getUsername().toUpperCase(), tableName, "%");
+                } else {
+                    colRet = dbMetData.getColumns(config.getUsername(), null, tableName, "%");
+                }
 
-            table.setName(tableName);
-            table.setRemarks(tableRemarks);
-            table.setColumns(columns);
+                while (colRet.next()) {
+                    String columnName = colRet.getString("COLUMN_NAME");
+                    String columnType = colRet.getString("TYPE_NAME");
+                    String columnRemarks = colRet.getString("REMARKS");
+                    int columnSize = colRet.getInt("COLUMN_SIZE");
+                    int nullable = colRet.getInt("NULLABLE");
+                    int decimalDigits = colRet.getInt("DECIMAL_DIGITS");
+                    Column column = new Column();
+                    column.setName(columnName);
+                    column.setType(columnType);
+                    column.setRemarks(columnRemarks);
+                    column.setDecimalDigits(decimalDigits);
+                    column.setSize(columnSize);
+                    column.setNullable(nullable == 1);
+                    columns.add(column);
+                }
+                colRet.close();
 
-            ResultSet primaryKeysRet;
-            if (DbType.ORACLE.getType().equals(config.getDbType().getType())) {
-                primaryKeysRet = conn.getMetaData().getPrimaryKeys(null, config.getUsername().toUpperCase(), tableName);
-            } else {
-                primaryKeysRet = conn.getMetaData().getPrimaryKeys(config.getUsername(), null, tableName);
-            }
-            List<Column> primaryKeys = new ArrayList<>();
-            while (primaryKeysRet.next()) {
-                String columnName = primaryKeysRet.getString("COLUMN_NAME");
-                for (Column column : columns) {
-                    if (column.getName().equals(columnName)) {
-                        column.setPrimaryKey(true);
-                        primaryKeys.add(column);
+                table.setName(tableName);
+                table.setRemarks(tableRemarks);
+                table.setColumns(columns);
+
+                ResultSet primaryKeysRet;
+                if (DbType.ORACLE.getType().equals(config.getDbType().getType())) {
+                    primaryKeysRet = conn.getMetaData().getPrimaryKeys(null, config.getUsername().toUpperCase(), tableName);
+                } else {
+                    primaryKeysRet = conn.getMetaData().getPrimaryKeys(config.getUsername(), null, tableName);
+                }
+                List<Column> primaryKeys = new ArrayList<>();
+                while (primaryKeysRet.next()) {
+                    String columnName = primaryKeysRet.getString("COLUMN_NAME");
+                    for (Column column : columns) {
+                        if (column.getName().equals(columnName)) {
+                            column.setPrimaryKey(true);
+                            primaryKeys.add(column);
+                        }
                     }
                 }
+                primaryKeysRet.close();
+
+                table.setPrimaryKeys(primaryKeys);
+                table.setTimestamp(timestamp);
+                tableList.add(table);
+                System.out.println("Db2j-ce: " + tableList.size() + ". " + schemaName + "." + tableName);
             }
-            table.setPrimaryKeys(primaryKeys);
-            table.setTimestamp(timestamp);
-            tableList.add(table);
-            System.out.println("Db2j-ce: " + tableList.size() + ". " + tableName);
+            rs.close();
+            schema.setName(schemaName);
+            schema.setTables(tableList);
+            schema.setTimestamp(timestamp);
+            schemaList.add(schema);
         }
+        schemas.close();
         conn.close();
-        return tableList;
+        return schemaList;
     }
 }
