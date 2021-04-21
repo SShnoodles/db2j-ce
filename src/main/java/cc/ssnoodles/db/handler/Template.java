@@ -41,12 +41,6 @@ public interface Template {
             } else {
                 column.setFieldType(ColumnType.get(column.getType().toUpperCase()));
             }
-            if ("BigDecimal".equals(column.getFieldType())) {
-                imports.add("java.math.BigDecimal");
-            }
-            if ("OffsetDateTime".equals(column.getFieldType())) {
-                imports.add("java.time.OffsetDateTime");
-            }
             table.getPrimaryKeys().forEach(key -> {
                 if (key.getName().equals(column.getName())) {
                     key.setFieldType(column.getFieldType());
@@ -98,11 +92,10 @@ public interface Template {
                 Table table = new Table();
                 List<Column> columns = new ArrayList<>();
                 ResultSet colRet;
-                // https://stackoverflow.com/questions/38557956/databasemetadatagetcolumns-returns-an-empty-resultset
                 if (DbType.ORACLE.getType().equals(config.getDbType().getType())) {
                     colRet = dbMetData.getColumns(null, config.getUsername().toUpperCase(), tableName, "%");
                 } else {
-                    colRet = dbMetData.getColumns(config.getUsername(), null, tableName, "%");
+                    colRet = dbMetData.getColumns(config.getUsername(), schemaName, tableName, "%");
                 }
 
                 while (colRet.next()) {

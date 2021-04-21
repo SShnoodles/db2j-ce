@@ -56,7 +56,7 @@ public class VelocityUtil {
             velocityEngine.evaluate(velocityContext, outWriter, "Velocity Code Generate", template);
         } catch (Exception e) {
             // 将异常全部捕获，直接返回，用于写入模板
-            StringBuilder builder = new StringBuilder("在生成代码时，模板发生了如下语法错误：\n");
+            StringBuilder builder = new StringBuilder("When generating code, the template has error：\n");
             StringWriter writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             builder.append(writer.toString());
@@ -81,7 +81,7 @@ public class VelocityUtil {
             velocityEngine.evaluate(velocityContext, outWriter, "Velocity Code Generate", template);
         } catch (Exception e) {
             // 将异常全部捕获，直接返回，用于写入模板
-            StringBuilder builder = new StringBuilder("在生成代码时，模板发生了如下语法错误：\n");
+            StringBuilder builder = new StringBuilder("When generating code, the template has error：\n");
             StringWriter writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             builder.append(writer.toString());
@@ -115,7 +115,7 @@ public class VelocityUtil {
             template.merge(velocityContext, outWriter);
         } catch (Exception e) {
             // 将异常全部捕获，直接返回，用于写入模板
-            StringBuilder builder = new StringBuilder("在生成代码时，模板发生了如下语法错误：\n");
+            StringBuilder builder = new StringBuilder("When generating code, the template has error：\n");
             StringWriter writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             builder.append(writer.toString());

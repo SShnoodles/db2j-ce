@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'cc.ssnoodles'
-version '1.1.0'
+version '1.1.1'
 
 sourceCompatibility = 1.8
 
@@ -16,10 +16,10 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.18'
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.23'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.24'
     implementation group: 'com.oracle.database.jdbc', name: 'ojdbc8', version: '21.1.0.0'
     implementation group: 'com.oracle.database.nls', name: 'orai18n', version: '21.1.0.0'
     implementation group: 'org.apache.velocity', name: 'velocity', version: '1.7'
